@@ -5,28 +5,6 @@
 #include "MSX0.H"
 
 
-int sendnode(p_path)
-char* p_path;
-{
-    int i, l;
-
-    l = strlen(p_path);
-
-    outp(IOT_PORT, 0xE0);
-    outp(IOT_PORT, 0x01);
-    outp(IOT_PORT, 0x53);
-    outp(IOT_PORT, 0xC0);
-
-    outp(IOT_PORT, l);
-    for (i = 0; i < l; i++)
-    {
-        outp(IOT_PORT, p_path[i]);
-    }
-    outp(IOT_PORT, 0x00);
-
-    return inp(IOT_PORT);
-}
-
 int iotfindc(p_path)
 char* p_path;
 {
@@ -145,6 +123,33 @@ char* p_str;
     return l;
 }
 
+int iotgetb(p_path, p_bytes)
+char* p_path;
+char* p_bytes;
+{
+    int i, l;
+
+    if (sendnode(p_path) != 0)
+    {
+        printf("The specified device was not found.\n");
+        printf("%s\n", p_path);
+        return -1;
+    }
+
+    outp(IOT_PORT, 0xE0);
+    outp(IOT_PORT, 0x01);
+    outp(IOT_PORT, 0x03);
+    outp(IOT_PORT, 0x80);
+
+    l = inp(IOT_PORT);
+    for (i = 0; i < l; i++)
+    {
+        p_bytes[i] = inp(IOT_PORT);
+    }
+
+    return l;
+}
+
 int iotputi(p_path, val)
 char* p_path;
 int val;
@@ -196,6 +201,56 @@ char* p_str;
         outp(IOT_PORT, p_str[i]);
     }
     outp(IOT_PORT, 0);
+
+    return inp(IOT_PORT);
+}
+
+int iotputb(p_path, p_bytes, len)
+char* p_path;
+char* p_bytes;
+char len;
+{
+    int i, l;
+
+    if (sendnode(p_path) != 0)
+    {
+        printf("The specified device was not found.\n");
+        printf("%s\n", p_path);
+        return -1;
+    }
+
+    outp(IOT_PORT, 0xE0);
+    outp(IOT_PORT, 0x01);
+    outp(IOT_PORT, 0x43);
+    outp(IOT_PORT, 0xC0);
+
+    outp(IOT_PORT, len);
+    for (i = 0; i < len; i++)
+    {
+        outp(IOT_PORT, p_bytes[i]);
+    }
+
+    return inp(IOT_PORT);
+}
+
+int sendnode(p_path)
+char* p_path;
+{
+    int i, l;
+
+    l = strlen(p_path);
+
+    outp(IOT_PORT, 0xE0);
+    outp(IOT_PORT, 0x01);
+    outp(IOT_PORT, 0x53);
+    outp(IOT_PORT, 0xC0);
+
+    outp(IOT_PORT, l);
+    for (i = 0; i < l; i++)
+    {
+        outp(IOT_PORT, p_path[i]);
+    }
+    outp(IOT_PORT, 0x00);
 
     return inp(IOT_PORT);
 }
